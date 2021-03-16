@@ -77,6 +77,12 @@ def debound_position(position: Position) -> Position:
     )
 
 
+def get_count(count, old_position, position):
+    if old_position.vertical == Vertical.DOWN and position.vertical == Vertical.TOP:
+        count += 1
+    return count
+
+
 # [Yellow, Blue, Red, Green]
 bounds = (0, 221, 80), (5, 255, 170)
 color = (10, 40, 160)
@@ -85,6 +91,10 @@ vs = VideoStream(src=0).start()
 
 nb_vertical_frame = {vertical: 0 for vertical in Vertical}
 nb_horizontal_frame = {horizontal: 0 for horizontal in Horizontal}
+
+count = 0
+old_count = 0
+old_position = None
 
 while True:
     frame = get_frame()
@@ -95,9 +105,14 @@ while True:
 
     if center is not None:
         position = get_current_position(center)
-        print(position)
         position = debound_position(position)
-        print(position)
+        if old_position is None:
+            old_position = position
+        count = get_count(count, old_position, position)
+        if count != old_count:
+            print(count, position.vertical.name, position.horizontal.name)
+        old_count = count
+        old_position = position
 
     cv2.imshow("Frame", frame)
 
